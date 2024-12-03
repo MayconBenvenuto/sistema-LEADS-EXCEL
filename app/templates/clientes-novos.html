@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads - Novos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+    
+</head>
+<body>
+    <!-- Botão para voltar à Home -->
+    <div class="mt-4 text-center">
+        <a href="/" class="btn btn-primary">Voltar para a Página Inicial</a>
+    </div>
+
+    <div class="container">
+        <h1 class="text-center my-4">Leads - Novos</h1>
+
+        <!-- Tabela de leads -->
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Telefone</th>
+                    <th>Status</th>
+                    <th>Observação</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lead in leads %}
+                    <tr id="lead-{{ loop.index0 }}">
+                        <td>{{ lead[0] }}</td>
+                        <td>{{ lead[1] }}</td>
+                        <td>{{ lead[2] }}</td>
+                        <td>
+                            <textarea 
+                                class="form-control" 
+                                id="observacao-{{ loop.index0 }}" 
+                                rows="2" 
+                                onblur="saveObservation('{{ loop.index0 }}', this.value)">
+                                {{ lead[3] }}
+                            </textarea>
+                        </td>
+                        <td>
+                            <button 
+                                class="btn btn-info" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#actionModal" 
+                                onclick="setLeadId('{{ loop.index0 }}', 'novos')">
+                                Ação
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Modal de Ação -->
+        <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="actionModalLabel">Escolha a Ação</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <button class="btn btn-primary" onclick="updateLeadStatus('agendado')">Agendado</button>
+                        <button class="btn btn-danger" onclick="updateLeadStatus('sem interesse')">Sem Interesse</button>
+                        <button class="btn btn-warning" onclick="updateLeadStatus('caixa postal')">Caixa Postal</button>
+                        <button class="btn btn-secondary" onclick="updateLeadStatus('não atendeu')">Não Atendeu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedLeadId = null; // ID do lead selecionado
+        let tipo = "novos"; // Página atual
+
+        // Define o ID do lead selecionado e o tipo da página
+        function setLeadId(leadId, tipoPagina) {
+            selectedLeadId = leadId;
+            tipo = tipoPagina;
+        }
+
+        // Mostra uma mensagem de sucesso ou erro
+        function mostrarMensagem(msg, tipo) {
+            const mensagem = document.createElement('div');
+            mensagem.className = `alert alert-${tipo}`;
+            mensagem.textContent = msg;
+            document.body.prepend(mensagem);
+            setTimeout(() => mensagem.remove(), 3000);
+        }
+
+        // Atualiza o status do lead e a cor da linha
+        function updateLeadStatus(status) {
+            const leadRow = document.getElementById(`lead-${selectedLeadId}`);
+
+            // Define a cor da linha com base no status
+            const cores = {
+                'agendado': '#28a745', // Verde
+                'sem interesse': '#dc3545', // Vermelho
+                'caixa postal': '#ffc107', // Amarelo Claro
+                'não atendeu': '#6c757d' // Cinza
+            };
+
+            leadRow.style.backgroundColor = cores[status] || '#ffffff';
+
+            // Envia os dados para o servidor
+            fetch('/atualizar_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'lead_id': selectedLeadId,
+                    'status': status,
+                    'tipo': tipo
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    mostrarMensagem('Status atualizado com sucesso!', 'success');
+                } else {
+                    mostrarMensagem('Erro ao atualizar status.', 'danger');
+                }
+            })
+            .catch(error => {
+                mostrarMensagem('Erro ao atualizar status: ' + error, 'danger');
+            });
+        }
+
+        // Salva a observação do lead
+        function saveObservation(leadId, observacao) {
+            fetch('/salvar_observacao', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'lead_id': leadId,
+                    'observacao': observacao,
+                    'tipo': tipo
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    mostrarMensagem('Observação salva com sucesso!', 'success');
+                } else {
+                    mostrarMensagem('Erro ao salvar observação.', 'danger');
+                }
+            })
+            .catch(error => {
+                mostrarMensagem('Erro ao salvar observação: ' + error, 'danger');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Leads</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .btn-custom {
+            width: 200px;
+            padding: 15px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .btn-novos {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-seminovos {
+            background-color: #ffc107;
+            color: white;
+        }
+        .btn-custom:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="text-center">Bem-vindo ao Sistema de Leads</h1>
+        <p class="text-center">Escolha a categoria de leads para entrar em contato:</p>
+        
+        <div class="button-container">
+            <a href="{{ url_for('novos') }}" class="btn btn-custom btn-novos">Novos</a>
+            <a href="{{ url_for('seminovos') }}" class="btn btn-custom btn-seminovos">Seminovos</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
